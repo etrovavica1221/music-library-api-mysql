@@ -69,7 +69,7 @@ describe('/artists', () => {
       });
     });
 
-    describe('GET /artists/:artistId', () => {
+    describe('GET /artists/:id', () => {
       it('gets artist record by id', (done) => {
         const artist = artists[0];
         request(app)
@@ -93,7 +93,7 @@ describe('/artists', () => {
       });
     });
 
-    describe('PATCH /artists/:artistId', () => {
+    describe('PATCH /artists/:id', () => {
       it('updates artist genre by id', (done) => {
         const artist = artists[0];
         request(app)
@@ -108,7 +108,7 @@ describe('/artists', () => {
           });
       });
 
-      xit('returns a 404 if the artist does not exist', (done) => {
+      it('returns a 404 if the artist does not exist', (done) => {
         request(app)
           .patch('/artists/12345')
           .send({ genre: 'Psychedelic Rock' })
@@ -118,10 +118,35 @@ describe('/artists', () => {
             done();
           });
       });
+
+      it('updates artist name by id', (done) => {
+        const artist = artists[0];
+        request(app)
+          .patch(`/artists/${artist.id}`)
+          .send({ name: 'Modern Talking' })
+          .then((res) => {
+            expect(res.status).to.equal(200);
+            Artist.findByPk(artist.id, { raw: true }).then((updatedArtist) => {
+              expect(updatedArtist.name).to.equal('Modern Talking');
+              done();
+            });
+          });
+      });
+
+      it('returns a 404 if the artist does not exist', (done) => {
+        request(app)
+          .patch('/artists/12345')
+          .send({ name: 'Modern Talking' })
+          .then((res) => {
+            expect(res.status).to.equal(404);
+            expect(res.body.error).to.equal('The artist could not be found.');
+            done();
+          });
+      });
     });
 
     describe('DELETE /artists/:artistId', () => {
-      xit('deletes artist record by id', (done) => {
+      it('deletes artist record by id', (done) => {
         const artist = artists[0];
         request(app)
           .delete(`/artists/${artist.id}`)
@@ -134,7 +159,7 @@ describe('/artists', () => {
           });
       });
 
-      xit('returns a 404 if the artist does not exist', (done) => {
+      it('returns a 404 if the artist does not exist', (done) => {
         request(app)
           .delete('/artists/12345')
           .then((res) => {
