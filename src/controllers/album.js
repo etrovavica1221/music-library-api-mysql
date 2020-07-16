@@ -7,22 +7,12 @@ exports.createAlbum = (req, res) => {
   Artist.findByPk(id).then((foundArtist) => {
     if (!foundArtist) {
       res.status(404).json({ error: 'The artist could not be found.' });
-    } else if (req.body[0]) {
-      const promiseArr = req.body.map((entry) => {
-        Album.create(entry).then((album) => album.setArtist(foundArtist));
-      });
-
-      Promise.all(promiseArr)
-        .catch((err) => console.log('something failed to resolve', err))
-        .then((albums) => res.status(201).json(albums));
     } else {
-      Album.create({ year: req.body.year, name: req.body.name }).then(
-        (album) => {
-          album.setArtist(foundArtist).then((updatedAlbum) => {
-            res.status(201).json(updatedAlbum);
-          });
-        }
-      );
+      Album.create(req.body).then((album) => {
+        album.setArtist(id).then((connectedAlbum) => {
+          res.status(201).send(connectedAlbum);
+        });
+      });
     }
   });
 };
@@ -34,7 +24,7 @@ exports.getAlbumsByArtistId = (req, res) => {
     if (!foundArtist) {
       res.status(404).json({ error: 'The artist could not be found.' });
     } else {
-      Album.findAll({ where: { artistId: artistId } }).then((foundAlbums) =>
+      Album.findAll({ where: { id: id } }).then((foundAlbums) =>
         res.status(200).json(foundAlbums)
       );
     }
