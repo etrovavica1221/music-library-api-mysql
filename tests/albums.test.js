@@ -111,6 +111,7 @@ describe('/albums', () => {
     describe('GET /artists/:artistId/albums/:albumId', () => {
       it('gets an album by id', (done) => {
         let album = albums[0];
+        let artist = artist[0];
         request(app)
           .get(`/artists/${artist.id}/albums/${album.id}`)
           .then((res) => {

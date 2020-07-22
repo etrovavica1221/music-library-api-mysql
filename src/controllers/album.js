@@ -34,12 +34,12 @@ exports.getOneAlbum = (req, res) => {
   const { artistId, albumId } = req.params;
 
   Artist.findByPk(artistId).then((artist) => {
-    console.log(artist);
     if (!artist) {
       res.status(404).json({ error: 'The artist could not be found.' });
     } else {
-      Album.findOne({ where: { artistId: artistId, id: albumId } }).then(
+      Album.findAll({ where: { artistId: artistId, id: albumId } }).then(
         (album) => {
+          console.log(album.name);
           if (!album) {
             res.status(404).json({ error: 'The album could not be found.' });
           } else {
