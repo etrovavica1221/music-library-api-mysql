@@ -1,9 +1,7 @@
 const express = require('express');
 
 const artistRouter = require('./routes/artist.js');
-const albumRouter = require('./routes/album');
 
-const artistControllers = require('./controllers/artist');
 const albumControllers = require('./controllers/album');
 const songsControllers = require('./controllers/song');
 const { request } = require('express');
@@ -11,18 +9,7 @@ const { request } = require('express');
 const app = express();
 
 app.use(express.json());
-
-// artist
-
-app.post('/artists', artistControllers.create);
-
-app.get('/artists', artistControllers.list);
-
-app.get('/artists/:id', artistControllers.getArtistById);
-
-app.patch('/artists/:id', artistControllers.updateArtist);
-
-app.delete('/artists/:id', artistControllers.delete);
+app.use('/artists', artistRouter);
 
 // album
 
