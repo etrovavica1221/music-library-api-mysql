@@ -39,10 +39,10 @@ describe('/songs', () => {
 
   // POST
 
-  describe('POST /album/:albumId/song', () => {
+  describe('POST /albums/:albumId/song', () => {
     it('creates a new song under an album', (done) => {
       request(app)
-        .post(`/album/${album.id}/songs`)
+        .post(`/albums/${album.id}/songs`)
         .send({
           artist: artist.id,
           name: 'Solitude Is Bliss',
@@ -60,7 +60,7 @@ describe('/songs', () => {
 
     it('returns a 404 and does not create a song if the album does not exist', (done) => {
       request(app)
-        .post(`/album/12345/songs`)
+        .post(`/albums/12345/songs`)
         .send({
           name: 'doesnt really matter',
         })
@@ -103,10 +103,10 @@ describe('/songs', () => {
       });
     });
 
-    describe('GET /album/:albumId/songs', () => {
+    describe('GET /albums/:albumId/songs', () => {
       it('gets all songs of one album', (done) => {
         request(app)
-          .get(`/album/${album.id}/songs`)
+          .get(`/albums/${album.id}/songs`)
           .then((res) => {
             expect(res.status).to.equal(200);
             expect(songs.length).to.equal(3);
@@ -121,24 +121,11 @@ describe('/songs', () => {
       });
     });
 
-    describe('GET /album/:albumId/songs/:songId', () => {
-      it('gets a song by id', (done) => {
-        let song = songs[0];
-        let album = albums[0];
-        request(app)
-          .get(`/album/${album.id}/songs/${song.id}`)
-          .then((res) => {
-            expect(res.status).to.equal(200);
-            expect(res.body.name).to.equal(song.name);
-            expect(res.body.artistId).to.equal(artist.id);
-            expect(res.body.albumId).to.equal(album.id);
-            done();
-          });
-      });
-
+    describe('GET /albums/:albumId/songs/:songId', () => {
       it('returns a 404 if the album does not exist', (done) => {
+        let song = songs[0];
         request(app)
-          .get(`/album/12345/songs/${song.id}`)
+          .get(`/albums/12345/songs/${song.id}`)
           .then((res) => {
             expect(res.status).to.equal(404);
             expect(res.body.error).to.equal('The album could not be found.');
@@ -146,9 +133,78 @@ describe('/songs', () => {
           });
       });
 
+      it('gets a song by id', (done) => {
+        let song = songs[0];
+        request(app)
+          .get(`/albums/${album.id}/songs/${song.id}`)
+          .then((res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body[0].name).to.equal(song.name);
+            expect(res.body[0].artistId).to.equal(artist.id);
+            expect(res.body[0].albumId).to.equal(album.id);
+            done();
+          });
+      });
+
       it('returns a 404 if the song does not exist', (done) => {
         request(app)
-          .get(`/album/${album.id}/songs/12345`)
+          .get(`/albums/${album.id}/songs/12345`)
+          .then((res) => {
+            expect(res.status).to.equal(404);
+            expect(res.body.error).to.equal('The song could not be found.');
+            done();
+          });
+      });
+    });
+
+    // PATCH
+
+    describe('PATCH /albums/:albumId/songs/:songId', () => {
+      it('updates the song name by id', (done) => {
+        let song = songs[1];
+        request(app)
+          .patch(`/albums/${album.id}/songs/${song.id}`)
+          .send({ name: 'Live Forever' })
+          .then((res) => {
+            expect(res.status).to.equal(200);
+            Song.findByPk(song.id, { raw: true }).then((updatedSong) => {
+              expect(updatedSong.name).to.equal('Live Forever');
+              done();
+            });
+          });
+      });
+
+      it('returns a 404 if the song does not exist', (done) => {
+        request(app)
+          .patch(`/albums/${album.id}/songs/12345`)
+          .send({ name: 'Live Forever' })
+          .then((res) => {
+            expect(res.status).to.equal(404);
+            expect(res.body.error).to.equal('The song could not be found');
+            done();
+          });
+      });
+    });
+
+    // DELETE
+
+    describe('DELETE /albums/:albumId/songs/:songId', () => {
+      it('deletes the song by id', (done) => {
+        let song = songs[0];
+        request(app)
+          .delete(`/albums/${album.id}/songs/${song.id}`)
+          .then((res) => {
+            expect(res.status).to.equal(204);
+            Song.findByPk(song.id, { raw: true }).then((updatedSong) => {
+              expect(updatedSong).to.equal(null);
+              done();
+            });
+          });
+      });
+
+      it('returns 404 if the song does not exist', (done) => {
+        request(app)
+          .delete(`/albums/${album.id}/songs/12345`)
           .then((res) => {
             expect(res.status).to.equal(404);
             expect(res.body.error).to.equal('The song could not be found.');

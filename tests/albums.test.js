@@ -91,7 +91,7 @@ describe('/albums', () => {
       });
     });
 
-    describe('GET /artists/:id/albums', () => {
+    describe('GET /artists/:artistId/albums', () => {
       it('gets all albums records of one artist', (done) => {
         request(app)
           .get(`/artists/${artist.id}/albums`)
@@ -109,20 +109,8 @@ describe('/albums', () => {
     });
 
     describe('GET /artists/:artistId/albums/:albumId', () => {
-      it('gets an album by id', (done) => {
-        let album = albums[0];
-        let artist = artist[0];
-        request(app)
-          .get(`/artists/${artist.id}/albums/${album.id}`)
-          .then((res) => {
-            expect(res.status).to.equal(200);
-            expect(res.body.name).to.equal(album.name);
-            expect(res.body.year).to.equal(album.year);
-            done();
-          });
-      });
-
       it('returns a 404 if the artist does not exist', (done) => {
+        let album = albums[0];
         request(app)
           .get(`/artists/12345/albums/${album.id}`)
           .then((res) => {
@@ -141,12 +129,24 @@ describe('/albums', () => {
             done();
           });
       });
+
+      it('gets an album by id', (done) => {
+        let album = albums[0];
+        request(app)
+          .get(`/artists/${artist.id}/albums/${album.id}`)
+          .then((res) => {
+            expect(res.status).to.equal(200);
+            expect(res.body[0].name).to.equal(album.name);
+            expect(res.body[0].year).to.equal(album.year);
+            done();
+          });
+      });
     });
 
     // PATCH
 
     describe('PATCH /artists/:artistId/albums/:albumId', () => {
-      it('updates album name by id', (done) => {
+      it('updates the album name by id', (done) => {
         let album = albums[0];
         request(app)
           .patch(`/artists/${artist.id}/albums/${album.id}`)
@@ -200,7 +200,7 @@ describe('/albums', () => {
     // DELETE
 
     describe('DELETE /artists/:artistId/albums/:albumId', () => {
-      it('deletes album by id', (done) => {
+      it('deletes the album by id', (done) => {
         let album = albums[0];
         request(app)
           .delete(`/artists/${artist.id}/albums/${album.id}`)

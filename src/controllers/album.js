@@ -17,13 +17,13 @@ exports.createAlbum = (req, res) => {
 };
 
 exports.getAlbumsByArtistId = (req, res) => {
-  const { id } = req.params;
+  const { artistId } = req.params;
 
-  Artist.findByPk(id).then((artist) => {
+  Artist.findByPk(artistId).then((artist) => {
     if (!artist) {
       res.status(404).json({ error: 'The artist could not be found.' });
     } else {
-      Album.findAll({ where: { id: id } }).then((album) =>
+      Album.findAll({ where: { artistId: artistId } }).then((album) =>
         res.status(200).json(album)
       );
     }
@@ -39,8 +39,7 @@ exports.getOneAlbum = (req, res) => {
     } else {
       Album.findAll({ where: { artistId: artistId, id: albumId } }).then(
         (album) => {
-          console.log(album.name);
-          if (!album) {
+          if (album.length === 0) {
             res.status(404).json({ error: 'The album could not be found.' });
           } else {
             res.status(200).json(album);
